@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"> 
+<style>
+
+.column {
+    float: left;
+    width: 50%;
+}
+
+.row:after {
+    display: table;
+    clear: both;
+}
+
+/* Popup container - can be anything you want */
+.popup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
+    font-weight: bolder; 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+    visibility: hidden;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -80px;
+}
+
+/* Popup arrow */
+.popup .popuptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;} 
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
+}
+</style>
+
+<title>My Sudoku Page
+</title>
+
+<script type="text/javascript" >
+
+var allowed = [];
+
+for (var a = 1; a < 4; a++ ) {
+	for (var b = 1; b < 4; b++ ) {
+		allowed["r"+a+b] = [undefined,true,true,true,true,true,true,true,true,true];
+		allowed["c"+a+b] = [undefined,true,true,true,true,true,true,true,true,true];
+		allowed["b"+a+b] = [undefined,true,true,true,true,true,true,true,true,true];
+	}
+}
+
+function showSingles( getall ) {
+   var found = false;
+	for ( var a = 1; a < 4; a++ ) {
+		for ( var b = 1; b < 4; b++ ) {
+			for ( var c = 1; c < 4; c++ ) {
+				for ( var d = 1; d < 4; d++ ) {
+				   var v;			
+				   var cnt = 0;
+					for ( var x = 1; x < 10; x++ ) {
+						if (
+						     allowed["r"+a+c][x] &&
+		      			  allowed["c"+b+d][x] &&
+		      		     allowed["b"+a+b][x]
+		      		   ) {
+		      		   	v = x;
+		      		   	cnt++;
+		      		}
+    			   }
+    			   if ((cnt == 1 ) && ! Number(allowed["q"+a+b+c+d])) {
+         var poptxt = "<span class='popuptext' id='pop"+a+b+c+d+"'>Txt</span>";
+    			   	var elem = document.getElementById("box"+a+b+c+d);
+    			   	elem.innerHTML=v+poptxt;
+    			   	elem.style.color = "red";
+    			   	found = true;
+    			   	if (! getall) { return true; }	 			   	
+    			   }
+   			}
+			}
+		}
+	}
+	return found;
+}
+
+function fillSingles( getall ) {
+   var found = false;
+	for ( var a = 1; a < 4; a++ ) {
+		for ( var b = 1; b < 4; b++ ) {
+			for ( var c = 1; c < 4; c++ ) {
+				for ( var d = 1; d < 4; d++ ) {
+				   var v;			
+				   var cnt = 0;
+					for ( var x = 1; x < 10; x++ ) {
+						if (
+						     allowed["r"+a+c][x] &&
+		      			  allowed["c"+b+d][x] &&
+		      		     allowed["b"+a+b][x]
+		      		   ) {
+		      		   	v = x;
+		      		   	cnt++;
+		      		}
+    			   }
+    			   if ((cnt == 1 ) && ! Number(allowed["q"+a+b+c+d])) {
+         var poptxt = "<span class='popuptext' id='pop"+a+b+c+d+"'>Txt</span>";
+    			   	var elem = document.getElementById("box"+a+b+c+d);
+    			   	elem.innerHTML=v+poptxt;
+    			   	elem.style.color = "red";
+    			   	found = true;
+    			   	setbox( a, b, c, d, v, false );
+    			   	if (! getall) { return true; }	 			   	
+    			   }
+   			}
+			}
+		}
+	}
+	return found;
+}
+
+function fillAllSingles() {
+	while( fillSingles( true ) );	
+}
+
+function showallowed( a, b, c, d) {
+   var popid = "pop"+a+b+c+d;
+	var txt = "<table border='1'><tr>";
+	for (var x = 1; x < 10; x++ ) {
+		if (( allowed["r"+a+c][x] &&
+		      allowed["c"+b+d][x] &&
+		      allowed["b"+a+b][x]) || allowed["q"+a+b+c+d] === x ) {
+         txt = txt + "<td onclick='setbox("+a+","+b+","+c+","+d+","+x+", true)'>"+x+"</td>";
+      }
+   }
+	document.getElementById(popid).innerHTML = txt + "</tr></table>";
+	return popid;
+}
+
+function setbox(a,b,c,d,v, dohide ) {
+   var y = allowed["q"+a+b+c+d];
+   var poptxt = "<span class='popuptext' id='pop"+a+b+c+d+"'>Txt"+a+b+c+d+"</span>";
+   if (Number(y)) {
+   	allowed["r"+a+c][y]=true;
+   	allowed["c"+b+d][y]=true;
+   	allowed["b"+a+b][y]=true;   	
+   }
+	allowed["r"+a+c][v] = false;
+	allowed["c"+b+d][v] = false;
+	allowed["b"+a+b][v] = false;
+	allowed["q"+a+b+c+d] = v;
+	var elem = document.getElementById("box"+a+b+c+d);
+	elem.innerHTML=v+poptxt;
+	elem.style.color = "black";	
+	if( dohide ) { showPop("pop"+a+b+c+d); }
+}
+
+</script>
+
+</head>
+
+<body style="text-align:center">
+
+<h1>Sudoku työkalu</h1>
+<p> Pieni apuri sudokujen täyttöön.
+<div class="column">
+<div class="row">
+<h2>Ohje</h2>
+<p>
+Klikkaa ruutua, niin saat listan sallituista numeroista.
+</p>
+<p>
+Valitse luku klikkaamalla sitä tai piilota lista klikkaamalla ruutua uudelleen.
+</p>
+</div>
+<div class="row">
+<p>
+Voit myös pyytää ratkaisuapua.
+</p>
+<p>
+<div style="background-color:lightblue" width="10%" onclick="showSingles(false)">
+Klikkaa tästa saadaksesi tietoosi uniikin vaihtoehdon</div>
+</p>
+<p>
+<div style="background-color:lightblue" width="10%" onclick="showSingles(true)">
+Klikkaa tästa saadaksesi tietoosi kaikki uniikit vaihtoehdot</div>
+</p>
+<p>
+<div style="background-color:lightblue" width="10%" onclick="fillSingles(false)">
+Klikkaa tästä, niin yksi (ensimmäinen löytyvä) uniikki vaihtoehto täytetään.</div>
+</p>
+<p>
+<div style="background-color:lightblue" width="10%" onclick="fillSingles(true)">
+Klikkaa tästä, niin kaikki tällä hetkellä uniikit (ja osa täytön myötä syntyvistä) täytetään.</div>
+</p>
+<p>
+<div style="background-color:lightblue" width="10%" onclick="fillAllSingles()">
+Klikkaa tästä, niin kaikki tällä hetkellä uniikit ja täytön seurauksena syntyvät uniikit täytetään.</div>
+</p>
+</div>
+<h2>Huomaa!</h2>
+<p>Edelliset riittävät vain helppojen Sudokujen ratkaisemiseen, vaikeammat 
+(tai useamman ratkaisun omaavat) vaativat enemmän päättelyä.</p>
+<p>Uniikki vaihoehto tarkoittaa ruutua, johon vain yksi numero on sijoitettavissa.</p>
+<p>Vaikeammassa pitää etsiä ainoa ruutu johon tietyn numeron voi sijoittaa.
+(Toiminto lisättänee myöhemmin.)</p>
+</div>
+</div>
+<div class="column">
+<table align="center" border="1">
+<script>
+for( var a = 1; a < 4; a++ ) {
+	document.write("<tr>");
+	for( var b = 1; b < 4; b++ ) {
+		document.write("<td>");
+		document.write("<table border='1' width='150' height='150'>")
+		for( var c = 1; c < 4; c++ ) {
+			document.write("<tr>");
+			for( var d = 1; d < 4; d++ ) {
+				document.write("<td onclick='showPop(showallowed("+a+","+b+","+c+","+d+"))'>");
+				document.write("<div id= 'box"+a+b+c+d+"' class='popup' >");
+				document.write("_");
+				document.write("<span class='popuptext' id='pop"+a+b+c+d+"'>Txt"+a+b+c+d+"</span>");
+				document.write("</duiv></td>");
+			}	
+			document.write("</tr>");
+		}
+		document.write("</table>");
+		document.write("</td>");
+	}	
+	document.write("</tr>");
+}
+
+</script>
+</table>
+</div>
+<script>
+// When the user clicks on td, open the popup
+function showPop( x ) {
+    var popup = document.getElementById(x);
+    popup.classList.toggle("show");
+}
+</script>
+
+</body>
+</html>
